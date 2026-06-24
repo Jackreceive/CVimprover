@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Intern Match</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="auth-view" id="authView">
+        <div class="auth-visual" aria-hidden="true">
+          <svg viewBox="0 0 560 420" role="img">
+            <rect x="36" y="52" width="488" height="316" rx="18" fill="#f7fbff" />
+            <rect x="68" y="88" width="184" height="246" rx="12" fill="#ffffff" stroke="#d7e0ea" />
+            <rect x="284" y="88" width="208" height="246" rx="12" fill="#ffffff" stroke="#d7e0ea" />
+            <path d="M100 132h92M100 166h116M100 200h74M100 252h120M100 286h86" stroke="#316b83" stroke-width="12" stroke-linecap="round" />
+            <path d="M320 290c34-98 74-112 132-156" stroke="#20a37f" stroke-width="16" stroke-linecap="round" fill="none" />
+            <circle cx="344" cy="268" r="18" fill="#20a37f" />
+            <circle cx="404" cy="194" r="18" fill="#f5a524" />
+            <circle cx="456" cy="144" r="18" fill="#4361ee" />
+            <rect x="320" y="120" width="64" height="16" rx="8" fill="#d7e0ea" />
+            <rect x="320" y="152" width="112" height="16" rx="8" fill="#d7e0ea" />
+          </svg>
+        </div>
+        <form class="auth-panel" id="authForm">
+          <div class="brand-row">
+            <span class="brand-mark">AIM</span>
+            <div>
+              <h1>AI Intern Match</h1>
+              <p>实习岗位匹配工作台</p>
+            </div>
+          </div>
+          <div class="mode-tabs" role="tablist">
+            <button class="mode-tab active" type="button" data-auth-mode="login">登录</button>
+            <button class="mode-tab" type="button" data-auth-mode="register">注册</button>
+          </div>
+          <label class="field">
+            <span>邮箱</span>
+            <input id="email" type="email" autocomplete="email" required />
+          </label>
+          <label class="field register-only hidden">
+            <span>姓名</span>
+            <input id="fullName" type="text" autocomplete="name" />
+          </label>
+          <label class="field">
+            <span>密码</span>
+            <input id="password" type="password" autocomplete="current-password" minlength="8" required />
+          </label>
+          <button class="primary-btn" id="authSubmit" type="submit">登录</button>
+          <p class="message" id="authMessage"></p>
+        </form>
+      </section>
+
+      <section class="app-view hidden" id="appView">
+        <header class="topbar">
+          <div class="brand-row compact">
+            <span class="brand-mark">AIM</span>
+            <div>
+              <h1>AI Intern Match</h1>
+              <p id="userLabel"></p>
+            </div>
+          </div>
+          <button class="ghost-btn" id="logoutBtn" type="button">退出</button>
+        </header>
+
+        <section class="metrics" id="metrics"></section>
+
+        <section class="work-grid">
+          <form class="panel upload-panel" id="resumeForm">
+            <div class="panel-head">
+              <h2>简历 PDF</h2>
+              <span id="resumeCount">0</span>
+            </div>
+            <label class="dropzone">
+              <input id="resumeFile" type="file" accept="application/pdf" required />
+              <span>选择 PDF</span>
+            </label>
+            <button class="primary-btn" type="submit">上传简历</button>
+          </form>
+
+          <form class="panel jd-panel" id="jobForm">
+            <div class="panel-head">
+              <h2>岗位 JD</h2>
+              <span id="jobCount">0</span>
+            </div>
+            <div class="field-row">
+              <label class="field">
+                <span>岗位</span>
+                <input id="jobTitle" type="text" required />
+              </label>
+              <label class="field">
+                <span>公司</span>
+                <input id="company" type="text" />
+              </label>
+            </div>
+            <label class="field">
+              <span>JD 内容</span>
+              <textarea id="jobContent" rows="8" minlength="20" required></textarea>
+            </label>
+            <button class="primary-btn" type="submit">保存 JD</button>
+          </form>
+
+          <form class="panel analysis-panel" id="matchForm">
+            <div class="panel-head">
+              <h2>匹配分析</h2>
+              <span id="matchState">待分析</span>
+            </div>
+            <label class="field">
+              <span>简历</span>
+              <select id="resumeSelect" required></select>
+            </label>
+            <label class="field">
+              <span>岗位</span>
+              <select id="jobSelect" required></select>
+            </label>
+            <button class="primary-btn" type="submit">开始分析</button>
+          </form>
+
+          <section class="panel result-panel">
+            <div class="panel-head">
+              <h2>分析结果</h2>
+              <button class="ghost-btn small" id="saveApplicationBtn" type="button">保存投递</button>
+            </div>
+            <div class="score-wrap">
+              <div class="score-ring" id="scoreRing"><span id="scoreText">--</span></div>
+              <p id="summaryText">暂无分析结果</p>
+            </div>
+            <div class="result-lists">
+              <div>
+                <h3>技能差距</h3>
+                <ul id="gapList"></ul>
+              </div>
+              <div>
+                <h3>简历建议</h3>
+                <ul id="suggestionList"></ul>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="board-section">
+          <div class="section-head">
+            <h2>投递状态看板</h2>
+            <p id="toast"></p>
+          </div>
+          <div class="kanban" id="kanban"></div>
+        </section>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
