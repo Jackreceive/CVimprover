@@ -84,6 +84,7 @@ export DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/intern
 export REDIS_URL=redis://localhost:6379/0
 celery -A app.worker.celery_app worker --loglevel=info
 ```
+##运行示例
 <img width="1465" height="724" alt="截屏2026-06-28 19 51 41" src="https://github.com/user-attachments/assets/ff39195b-96e8-4658-889a-108b7bf3923e" />
 <img width="1457" height="808" alt="截屏2026-06-28 19 52 33" src="https://github.com/user-attachments/assets/78ea8e54-2fe5-43c6-9abc-86bfb42ce3ea" />
 <img width="1477" height="389" alt="截屏2026-06-28 19 52 52" src="https://github.com/user-attachments/assets/53afb6ff-a002-4d83-b1fa-49ee7a6d3b83" />
