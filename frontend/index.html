@@ -3,32 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Intern Match</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <title>AI Intern Match · 实习投递工作台</title>
+    <link rel="stylesheet" href="/styles.css?v=20260628-2" />
   </head>
   <body>
     <main class="shell">
       <section class="auth-view" id="authView">
-        <div class="auth-visual" aria-hidden="true">
-          <svg viewBox="0 0 560 420" role="img">
-            <rect x="36" y="52" width="488" height="316" rx="18" fill="#f7fbff" />
-            <rect x="68" y="88" width="184" height="246" rx="12" fill="#ffffff" stroke="#d7e0ea" />
-            <rect x="284" y="88" width="208" height="246" rx="12" fill="#ffffff" stroke="#d7e0ea" />
-            <path d="M100 132h92M100 166h116M100 200h74M100 252h120M100 286h86" stroke="#316b83" stroke-width="12" stroke-linecap="round" />
-            <path d="M320 290c34-98 74-112 132-156" stroke="#20a37f" stroke-width="16" stroke-linecap="round" fill="none" />
-            <circle cx="344" cy="268" r="18" fill="#20a37f" />
-            <circle cx="404" cy="194" r="18" fill="#f5a524" />
-            <circle cx="456" cy="144" r="18" fill="#4361ee" />
-            <rect x="320" y="120" width="64" height="16" rx="8" fill="#d7e0ea" />
-            <rect x="320" y="152" width="112" height="16" rx="8" fill="#d7e0ea" />
-          </svg>
+        <div class="auth-visual" aria-label="AI Intern Match 工作台预览">
+          <div class="auth-copy">
+            <p>Resume desk / JD scanner</p>
+            <h2>把每一次投递，整理成可判断的证据</h2>
+          </div>
+          <div class="preview-board">
+            <div class="preview-topline">
+              <span>登录后开始整理</span>
+              <strong>--</strong>
+            </div>
+            <div class="preview-columns">
+              <section class="preview-pane resume-note">
+                <div class="preview-label">简历</div>
+                <strong>上传 PDF 后提取关键信息</strong>
+                <span>技能、项目、经历会在这里汇总</span>
+                <span>未登录时不读取个人数据</span>
+              </section>
+              <section class="preview-pane jd-note">
+                <div class="preview-label">岗位 JD</div>
+                <strong>保存 JD 后拆解要求</strong>
+                <span>职责、技能、加分项会在这里对齐</span>
+                <span>所有分析都在登录后进行</span>
+              </section>
+            </div>
+            <div class="preview-match">
+              <div class="preview-score"><span>--</span></div>
+              <div>
+                <strong>完成匹配后生成建议</strong>
+                <p>系统会把技能差距、简历修改建议和投递状态放在同一个工作台里。</p>
+              </div>
+            </div>
+            <div class="preview-status">
+              <span>待投递</span>
+              <span>已投递</span>
+              <span>面试中</span>
+            </div>
+          </div>
         </div>
         <form class="auth-panel" id="authForm">
           <div class="brand-row">
-            <span class="brand-mark">AIM</span>
+            <span class="brand-mark" aria-hidden="true">AIM</span>
             <div>
               <h1>AI Intern Match</h1>
-              <p>实习岗位匹配工作台</p>
+              <p>简历、JD、投递状态放在同一张桌面上</p>
             </div>
           </div>
           <div class="mode-tabs" role="tablist">
@@ -55,7 +79,7 @@
       <section class="app-view hidden" id="appView">
         <header class="topbar">
           <div class="brand-row compact">
-            <span class="brand-mark">AIM</span>
+            <span class="brand-mark" aria-hidden="true">AIM</span>
             <div>
               <h1>AI Intern Match</h1>
               <p id="userLabel"></p>
@@ -66,6 +90,13 @@
 
         <section class="metrics" id="metrics"></section>
 
+        <section class="desk-strip" aria-label="投递流程">
+          <span>PDF</span>
+          <span>JD</span>
+          <span>Match</span>
+          <span>Board</span>
+        </section>
+
         <section class="work-grid">
           <form class="panel upload-panel" id="resumeForm">
             <div class="panel-head">
@@ -74,7 +105,7 @@
             </div>
             <label class="dropzone">
               <input id="resumeFile" type="file" accept="application/pdf" required />
-              <span>选择 PDF</span>
+              <span id="resumeFileLabel">选择 PDF</span>
             </label>
             <button class="primary-btn" type="submit">上传简历</button>
           </form>
@@ -148,6 +179,6 @@
         </section>
       </section>
     </main>
-    <script src="/app.js"></script>
+    <script src="/app.js?v=20260628-2"></script>
   </body>
 </html>

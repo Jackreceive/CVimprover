@@ -1,6 +1,8 @@
+const sessionStore = window.sessionStorage;
+
 const api = {
-  token: localStorage.getItem("aim_token") || "",
-  user: JSON.parse(localStorage.getItem("aim_user") || "null"),
+  token: sessionStore.getItem("aim_token") || "",
+  user: safeJsonParse(sessionStore.getItem("aim_user")),
 };
 
 const state = {
@@ -24,6 +26,48 @@ const statusOrder = ["wishlist", "applied", "interviewing", "offer", "rejected"]
 
 const $ = (id) => document.getElementById(id);
 
+const matchLabels = {
+  pending: "排队中",
+  processing: "分析中",
+  completed: "已完成",
+  failed: "分析失败",
+};
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function safeJsonParse(value) {
+  try {
+    return value ? JSON.parse(value) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearSession() {
+  api.token = "";
+  api.user = null;
+  sessionStore.removeItem("aim_token");
+  sessionStore.removeItem("aim_user");
+  localStorage.removeItem("aim_token");
+  localStorage.removeItem("aim_user");
+}
+
+function optionHtml(value, label, selected = false) {
+  return `<option value="${escapeHtml(value)}" ${selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
+}
+
+function listHtml(items, emptyText) {
+  if (!items?.length) return `<li class="empty-list">${escapeHtml(emptyText)}</li>`;
+  return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
 function setMessage(id, text, isError = true) {
   const el = $(id);
   el.textContent = text || "";
@@ -37,7 +81,12 @@ async function request(path, options = {}) {
 
   const response = await fetch(`/api${path}`, { ...options, headers });
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = { detail: text || "服务返回了非 JSON 响应" };
+  }
   if (!response.ok) throw new Error(data?.detail || "请求失败");
   return data;
 }
@@ -51,6 +100,8 @@ function showApp() {
 function showAuth() {
   $("appView").classList.add("hidden");
   $("authView").classList.remove("hidden");
+  $("userLabel").textContent = "";
+  setMessage("toast", "");
 }
 
 function setAuthMode(mode) {
@@ -65,12 +116,12 @@ function setAuthMode(mode) {
 function renderSelects() {
   $("resumeCount").textContent = state.resumes.length;
   $("jobCount").textContent = state.jobs.length;
-  $("resumeSelect").innerHTML = state.resumes
-    .map((resume) => `<option value="${resume.id}">${resume.filename}</option>`)
-    .join("");
-  $("jobSelect").innerHTML = state.jobs
-    .map((job) => `<option value="${job.id}">${job.company ? `${job.company} · ` : ""}${job.title}</option>`)
-    .join("");
+  $("resumeSelect").innerHTML = state.resumes.length
+    ? state.resumes.map((resume) => optionHtml(resume.id, resume.filename)).join("")
+    : optionHtml("", "先上传一份 PDF 简历");
+  $("jobSelect").innerHTML = state.jobs.length
+    ? state.jobs.map((job) => optionHtml(job.id, `${job.company ? `${job.company} · ` : ""}${job.title}`)).join("")
+    : optionHtml("", "先保存一个岗位 JD");
 }
 
 function renderMetrics() {
@@ -84,19 +135,19 @@ function renderMetrics() {
     : 0;
   const metrics = [{ label: "平均匹配", value: `${avg}%` }, ...stats];
   $("metrics").innerHTML = metrics
-    .map((metric) => `<div class="metric"><strong>${metric.value}</strong><span>${metric.label}</span></div>`)
+    .map((metric) => `<div class="metric"><strong>${escapeHtml(metric.value)}</strong><span>${escapeHtml(metric.label)}</span></div>`)
     .join("");
 }
 
 function renderResult(match) {
   state.currentMatch = match;
   const score = match?.score ?? null;
-  $("matchState").textContent = match ? labels[match.status] || match.status : "待分析";
+  $("matchState").textContent = match ? matchLabels[match.status] || match.status : "待分析";
   $("scoreText").textContent = score === null ? "--" : `${score}%`;
   $("scoreRing").style.background = `conic-gradient(var(--green) ${score ? score * 3.6 : 0}deg, #e6edf4 0deg)`;
   $("summaryText").textContent = match?.summary || match?.error_message || "暂无分析结果";
-  $("gapList").innerHTML = (match?.skill_gaps || []).map((item) => `<li>${item}</li>`).join("");
-  $("suggestionList").innerHTML = (match?.resume_suggestions || []).map((item) => `<li>${item}</li>`).join("");
+  $("gapList").innerHTML = listHtml(match?.skill_gaps, "分析完成后显示技能差距");
+  $("suggestionList").innerHTML = listHtml(match?.resume_suggestions, "分析完成后显示修改建议");
 }
 
 function renderKanban() {
@@ -105,21 +156,21 @@ function renderKanban() {
       const cards = state.applications.filter((item) => item.status === status);
       return `
         <section class="column">
-          <h3>${labels[status]} <span>${cards.length}</span></h3>
+          <h3>${escapeHtml(labels[status])} <span>${cards.length}</span></h3>
           ${cards
             .map(
               (item) => `
               <article class="application-card">
-                <strong>${item.job?.title || "未命名岗位"}</strong>
-                <p>${item.job?.company || "未填写公司"}${item.match?.score ? ` · 匹配 ${item.match.score}%` : ""}</p>
-                <p>${item.notes || ""}</p>
+                <strong>${escapeHtml(item.job?.title || "未命名岗位")}</strong>
+                <p>${escapeHtml(item.job?.company || "未填写公司")}${item.match?.score ? ` · 匹配 ${escapeHtml(item.match.score)}%` : ""}</p>
+                <p>${escapeHtml(item.notes || "暂无备注")}</p>
                 <select data-application-id="${item.id}">
-                  ${statusOrder.map((option) => `<option value="${option}" ${option === item.status ? "selected" : ""}>${labels[option]}</option>`).join("")}
+                  ${statusOrder.map((option) => optionHtml(option, labels[option], option === item.status)).join("")}
                 </select>
               </article>
             `
             )
-            .join("")}
+            .join("") || '<div class="empty-card">暂无投递</div>'}
         </section>
       `;
     })
@@ -190,8 +241,8 @@ $("authForm").addEventListener("submit", async (event) => {
     });
     api.token = result.access_token;
     api.user = result.user;
-    localStorage.setItem("aim_token", api.token);
-    localStorage.setItem("aim_user", JSON.stringify(api.user));
+    sessionStore.setItem("aim_token", api.token);
+    sessionStore.setItem("aim_user", JSON.stringify(api.user));
     showApp();
     await refreshAll();
   } catch (error) {
@@ -200,10 +251,7 @@ $("authForm").addEventListener("submit", async (event) => {
 });
 
 $("logoutBtn").addEventListener("click", () => {
-  api.token = "";
-  api.user = null;
-  localStorage.removeItem("aim_token");
-  localStorage.removeItem("aim_user");
+  clearSession();
   showAuth();
 });
 
@@ -215,6 +263,11 @@ $("resumeForm").addEventListener("submit", async (event) => {
   await request("/resumes", { method: "POST", body: form });
   $("resumeFile").value = "";
   await refreshAll();
+});
+
+$("resumeFile").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  $("resumeFileLabel").textContent = file?.name || "选择 PDF";
 });
 
 $("jobForm").addEventListener("submit", async (event) => {
@@ -265,9 +318,21 @@ $("saveApplicationBtn").addEventListener("click", async () => {
   setMessage("toast", "投递记录已保存", false);
 });
 
-if (api.token) {
-  showApp();
-  refreshAll().catch(() => showAuth());
-} else {
+async function bootstrapSession() {
   showAuth();
+  localStorage.removeItem("aim_token");
+  localStorage.removeItem("aim_user");
+  if (!api.token) return;
+
+  try {
+    api.user = await request("/auth/me");
+    sessionStore.setItem("aim_user", JSON.stringify(api.user));
+    showApp();
+    await refreshAll();
+  } catch {
+    clearSession();
+    showAuth();
+  }
 }
+
+bootstrapSession();
